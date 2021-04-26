@@ -21,11 +21,13 @@ class LineChart {
     this.xAxisLabelFontSize = 14;
     this.xAxisLabelFontFamliy = "sans-serif";
     this.xAxisLabelBaseline = "top";
+    this.xAxisLabelFontColor = "#000";
 
     this.yAxisLabelTextAlign = "end";
     this.yAxisLabelFontSize = 14;
     this.yAxisLabelFontFamliy = "sans-serif";
     this.yAxisLabelBaseline = "middle";
+    this.yAxisLabelFontColor = "#000";
 
     this.guideLineWidth = "1px";
     this.guideLineColor = "rgba(0,0,0,0.1)";
@@ -128,6 +130,7 @@ class LineChart {
     this.ctx.textAlign = this.xAxisLabelTextAlign;
     this.ctx.textBaseline = this.xAxisLabelBaseline;
     this.ctx.font = `${this.xAxisLabelFontSize}px ${this.xAxisLabelFontFamliy}`;
+    this.ctx.fillStyle = this.yAxisLabelFontColor;
 
     for (let i = 0; i < this.itemsNum; i++) {
       this.ctx.fillText(
@@ -156,6 +159,7 @@ class LineChart {
     this.ctx.textAlign = this.yAxisLabelTextAlign;
     this.ctx.textBaseline = this.yAxisLabelBaseline;
     this.ctx.font = `${this.yAxisLabelFontSize}px ${this.yAxisLabelFontFamliy}`;
+    this.ctx.fillStyle = this.yAxisLabelFontColor;
 
     for (let i = 0; i <= this.yAxisMarkFreq; i++) {
       this.ctx.fillText(
@@ -325,6 +329,11 @@ class LineChart {
       this.ctx.stroke();
       this.ctx.fill();
     }
+  }
+
+  eraseAll() {
+    this.ctx.fillStyle = "#fff";
+    this.ctx.fillRect(0, 0, this.width, this.height);
   }
 }
 

@@ -12,6 +12,7 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
+  position: relative;
 }
 
 #chart {
@@ -21,4 +22,26 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
+}
+
+.controller {
+  position: absolute;
+  top: 0;
+  left: 0;
+  display: flex;
+  justify-content: space-around;
+  width: 20%;
+  padding: 2rem 0;
+  background-color: rgb(74, 57, 231);
+}
+
+.controller > div {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.controller label {
+  color: #aaddff;
+  margin-bottom: 0.5rem;
 }
