@@ -4,6 +4,8 @@ class LineChart {
     this.setChartParameters();
     this.preferBasicSettings();
     this.drawChart();
+    this.hangUpDataDescription();
+    this.listenEvent();
   }
 
   setCanvasParameters(canvasWidth, canvasHeight, data, id) {
@@ -44,6 +46,7 @@ class LineChart {
 
   preferBasicSettings() {
     this.setCanvas();
+    this.canvasBoundingClientRect();
     this.handleData();
     this.setValueRange();
     this.setChartSize();
@@ -76,6 +79,10 @@ class LineChart {
 
     this.canvas = canvas;
     this.ctx = this.canvas.getContext("2d");
+  }
+
+  canvasBoundingClientRect() {
+    this.canvasRect = this.canvas.getBoundingClientRect();
   }
 
   handleData() {
@@ -209,10 +216,10 @@ class LineChart {
   drawLines() {
     this.ctx.strokeStyle = this.linesColor;
     this.ctx.lineJoin = this.linesJoinStyle;
-    let alpha;
-    const xStep = 20;
-    const yStep = 10;
-    let start = false;
+    this.drawLinesStart = false;
+
+    const step = { x: 20, y: 10 };
+
     this.ctx.beginPath();
 
     for (let i = 0; i < this.xAxisMarkFreq; i++) {
@@ -229,36 +236,39 @@ class LineChart {
           this.yAxisLabelDrawGap * (this.values[i + 1] / this.yAxisLabelNumGap),
       ];
 
-      const slope = (endY - startY) / (endX - startX);
-
-      if (slope > 0) {
-        alpha = -1;
-      } else {
-        alpha = 1;
-      }
-
-      const [controlX, controlY] = [
-        (startX + endX) / 2 - xStep * alpha,
-        (startY + endY) / 2 - yStep,
-      ];
-
-      if (!start) {
-        this.ctx.moveTo(startX, startY);
-        start = true;
-      }
-      this.ctx.quadraticCurveTo(controlX, controlY, endX, endY);
-      this.ctx.stroke();
+      this.drawQuadraticCurve(startX, startY, endX, endY, step);
     }
+
+    this.ctx.closePath();
+  }
+
+  drawQuadraticCurve(startX, startY, endX, endY, step) {
+    let alpha;
+    const slope = (endY - startY) / (endX - startX);
+
+    if (slope > 0) {
+      alpha = -1;
+    } else {
+      alpha = 1;
+    }
+
+    const [controlX, controlY] = [
+      (startX + endX) / 2 - step.x * alpha,
+      (startY + endY) / 2 - step.y,
+    ];
+
+    if (!this.drawLinesStart) {
+      this.ctx.moveTo(startX, startY);
+      this.drawLinesStart = true;
+    }
+    this.ctx.quadraticCurveTo(controlX, controlY, endX, endY);
+    this.ctx.stroke();
   }
 
   fillLinesInner() {
-    let alpha;
-    const xStep = 20;
-    const yStep = 10;
-
+    const step = { x: 20, y: 10 };
     const region = new Path2D();
-
-    let start = false;
+    this.drawSelectStart = false;
 
     for (let i = 0; i < this.xAxisMarkFreq; i++) {
       const [startX, startY] = [
@@ -274,26 +284,38 @@ class LineChart {
           this.yAxisLabelDrawGap * (this.values[i + 1] / this.yAxisLabelNumGap),
       ];
 
-      const slope = (endY - startY) / (endX - startX);
-
-      if (slope > 0) {
-        alpha = -1;
-      } else {
-        alpha = 1;
-      }
-
-      const [controlX, controlY] = [
-        (startX + endX) / 2 - xStep * alpha,
-        (startY + endY) / 2 - yStep,
-      ];
-
-      if (!start) {
-        region.moveTo(startX, startY);
-        start = true;
-      }
-      region.quadraticCurveTo(controlX, controlY, endX, endY);
+      this.selectLinesRegion(startX, startY, endX, endY, region, step);
     }
 
+    this.selectExtraRegionOfChart(region);
+
+    this.ctx.fillStyle = this.linesInnerColor;
+    this.ctx.fill(region);
+  }
+
+  selectLinesRegion(startX, startY, endX, endY, region, step) {
+    let alpha;
+    const slope = (endY - startY) / (endX - startX);
+
+    if (slope > 0) {
+      alpha = -1;
+    } else {
+      alpha = 1;
+    }
+
+    const [controlX, controlY] = [
+      (startX + endX) / 2 - step.x * alpha,
+      (startY + endY) / 2 - step.y,
+    ];
+
+    if (!this.drawSelectStart) {
+      region.moveTo(startX, startY);
+      this.drawSelectStart = true;
+    }
+    region.quadraticCurveTo(controlX, controlY, endX, endY);
+  }
+
+  selectExtraRegionOfChart(region) {
     region.lineTo(
       this.horizontalMargin + this.xAxisLength,
       this.verticalMargin + this.yAxisLength
@@ -309,9 +331,6 @@ class LineChart {
         this.yAxisLabelDrawGap * (this.values[0] / this.yAxisLabelNumGap)
     );
     region.closePath();
-
-    this.ctx.fillStyle = this.linesInnerColor;
-    this.ctx.fill(region);
   }
 
   drawValueMarker() {
@@ -331,9 +350,75 @@ class LineChart {
     }
   }
 
-  eraseAll() {
+  eraseAllChart() {
     this.ctx.fillStyle = "#fff";
     this.ctx.fillRect(0, 0, this.width, this.height);
+  }
+
+  hangUpDataDescription() {
+    this.removeDataDescription();
+    const { top, left } = this.canvasRect;
+
+    for (let i = 0; i < this.itemsNum; i++) {
+      const [x, y] = [
+        left + this.horizontalMargin + i * this.xAxisLabelDrawGap,
+        top +
+          this.verticalMargin +
+          this.yAxisLength -
+          this.yAxisLabelDrawGap * (this.values[i] / this.yAxisLabelNumGap),
+      ];
+      const div = document.createElement("div");
+      const span = document.createElement("p");
+      span.innerText = `${this.labels[i]}\n ${this.values[i]}`;
+      div.appendChild(span);
+      div.classList.add("description");
+      document.body.appendChild(div);
+      div.style.left = `${x}px`;
+      div.style.top = `${y}px`;
+    }
+  }
+
+  removeDataDescription() {
+    const dataDescriptions = document.querySelectorAll(".description");
+    if (dataDescriptions.length) {
+      dataDescriptions.forEach((desc) => document.body.removeChild(desc));
+    }
+  }
+
+  listenEvent() {
+    this.canvas.addEventListener("mousemove", (e) =>
+      this.handleDescriptionDisplay(e)
+    );
+
+    window.addEventListener("resize", (e) => this.handleResizeEvent());
+  }
+
+  handleDescriptionDisplay(e) {
+    const dataDescriptions = document.querySelectorAll(".description");
+
+    const { offsetX, offsetY } = e;
+    const step = 30;
+    this.data.forEach((el, i) => {
+      const x = this.horizontalMargin + i * this.xAxisLabelDrawGap;
+      const y =
+        this.verticalMargin +
+        this.yAxisLength -
+        this.yAxisLabelDrawGap * (this.values[i] / this.yAxisLabelNumGap);
+
+      const xCondition = offsetX >= x - step && offsetX <= x + step;
+      const yCondition = offsetY >= y - step && offsetY <= y + step;
+
+      if (!xCondition || !yCondition) {
+        dataDescriptions[i].style.display = "none";
+        return;
+      }
+      dataDescriptions[i].style.display = "block";
+    });
+  }
+
+  handleResizeEvent() {
+    this.canvasBoundingClientRect();
+    this.hangUpDataDescription();
   }
 }
 

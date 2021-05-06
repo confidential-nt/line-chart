@@ -24,6 +24,15 @@ body {
   justify-content: center;
 }
 
+.description {
+  position: absolute;
+  text-align: center;
+  display: none;
+  background-color: #fff;
+  border: 1px solid tomato;
+  padding: 0.2rem;
+}
+
 .controller {
   position: absolute;
   top: 0;

@@ -1,6 +1,6 @@
 import LineChart from "./line-chart.js";
 import { getData } from "./data.js";
-import { colorChangeListner } from "./color.js";
+import { colorChangeListener } from "./color.js";
 
 const canvasHeight = 600;
 const canvasWidth = 700;
@@ -19,7 +19,7 @@ try {
     { label: "grapes", value: 73 },
   ];
   const chart = new LineChart(canvasWidth, canvasHeight, data, targetId);
-  colorChangeListner(chart);
+  colorChangeListener(chart);
 } catch (error) {
   console.log(error);
 }

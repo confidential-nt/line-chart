@@ -1,4 +1,4 @@
-export function colorChangeListner(chart) {
+export function colorChangeListener(chart) {
   const inputs = document.querySelectorAll("[type=color]");
   inputs.forEach((input) =>
     input.addEventListener("input", (e) => {
@@ -18,7 +18,7 @@ function setGraphColor(chart, e) {
     chart.linesInnerColor = `rgba(${rgb},0.3)`;
   }
 
-  chart.eraseAll();
+  chart.eraseAllChart();
   chart.drawChart();
 }
 
