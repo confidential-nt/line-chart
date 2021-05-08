@@ -28,7 +28,7 @@ const data = getData(dataLength);
 
 (실행 화면)
 
-![실행화면](./line-chart.jpg)
+![실행화면]("./line-chart.jpg")
 
 ## 아쉬웠던 점
 
